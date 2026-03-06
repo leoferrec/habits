@@ -19,6 +19,7 @@ import { useStore } from '../store';
 import ConfettiEffect from './ConfettiEffect';
 import ToastContainer from './ToastContainer';
 import BreakPanel from './BreakPanel';
+import { playTab, playToggleOn, playToggleOff } from '../sounds';
 
 const tabs = [
   { path: '/', icon: CalendarCheck, label: 'Today' },
@@ -91,7 +92,7 @@ export default function Layout() {
         <div className="flex items-center gap-3">
           {/* Dark mode toggle */}
           <button
-            onClick={toggleColorMode}
+            onClick={() => { colorMode === 'light' ? playToggleOn() : playToggleOff(); toggleColorMode(); }}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
             style={{
               backgroundColor: 'var(--color-primary-faded)',
@@ -193,7 +194,7 @@ export default function Layout() {
           return (
             <button
               key={tab.path}
-              onClick={() => navigate(tab.path)}
+              onClick={() => { if (location.pathname !== tab.path) playTab(); navigate(tab.path); }}
               className="flex flex-col items-center gap-0.5 px-2 py-1 tap-highlight relative min-w-[50px]"
             >
               {isActive && (

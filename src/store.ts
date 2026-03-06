@@ -4,6 +4,7 @@ import type { Habit, RoutineBlock, Completion, TimerSession, Relapse, ThemeName,
 import { habitRepo, routineRepo, completionRepo, timerRepo, relapseRepo, db } from './db';
 import { calculateStrength, calculateStreak, getXPInfo, getTodayStr, isHabitScheduledForDate } from './logic';
 import { applyTheme } from './theme';
+import { playComplete, playUndo, playXP, playLevelUp, playTimerStart, playTimerPause, playTimerStop, playCreate, playDelete, playPanelOpen, playPanelClose } from './sounds';
 
 interface AppState {
   // Data
@@ -159,10 +160,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   toggleBreakPanel: () => {
-    set(s => ({ breakPanelOpen: !s.breakPanelOpen }));
+    const willOpen = !get().breakPanelOpen;
+    willOpen ? playPanelOpen() : playPanelClose();
+    set({ breakPanelOpen: willOpen });
   },
 
   setBreakPanelOpen: (open) => {
+    open ? playPanelOpen() : playPanelClose();
     set({ breakPanelOpen: open });
   },
 
@@ -176,6 +180,7 @@ export const useStore = create<AppState>((set, get) => ({
     await habitRepo.create(habit);
     const habits = await habitRepo.getAll();
     set({ habits });
+    playCreate();
     await get().refreshTodayHabits();
   },
 
@@ -190,6 +195,7 @@ export const useStore = create<AppState>((set, get) => ({
     await habitRepo.softDelete(id);
     const habits = await habitRepo.getAll();
     set({ habits });
+    playDelete();
     await get().refreshTodayHabits();
   },
 
@@ -269,13 +275,26 @@ export const useStore = create<AppState>((set, get) => ({
     if (existing?.done) {
       // Undo
       await completionRepo.unmarkDone(habitId, todayStr);
+      playUndo();
     } else {
       // Mark done
+      const prevLevel = get().xpInfo.level;
       const completion = await completionRepo.markDone(habitId, todayStr, habit.xpPerCompletion);
 
-      // Show XP toast + confetti
+      // Sound + XP toast + confetti
+      playComplete();
       get().addToast(`+${habit.xpPerCompletion} XP`, 'xp');
       get().triggerConfetti();
+
+      // Check for level up after reloading completions
+      const tempCompletions = await db.completions.filter(c => !c.deletedAt).toArray();
+      const newXpInfo = getXPInfo(tempCompletions, todayStr);
+      if (newXpInfo.level > prevLevel) {
+        setTimeout(() => {
+          playLevelUp();
+          get().addToast(`Level ${newXpInfo.level}!`, 'success');
+        }, 600);
+      }
 
       // Check for stacked habits (habits anchored to this one)
       const stackedHabits = habits.filter(h => h.anchorHabitId === habitId);
@@ -314,6 +333,7 @@ export const useStore = create<AppState>((set, get) => ({
       updatedAt: now,
     };
     await timerRepo.upsert(session);
+    playTimerStart();
     await get().refreshTodayHabits();
   },
 
@@ -333,6 +353,7 @@ export const useStore = create<AppState>((set, get) => ({
       status: 'paused',
       updatedAt: now.toISOString(),
     });
+    playTimerPause();
     await get().refreshTodayHabits();
   },
 
@@ -348,6 +369,7 @@ export const useStore = create<AppState>((set, get) => ({
       status: 'running',
       updatedAt: now,
     });
+    playTimerStart();
     await get().refreshTodayHabits();
   },
 
@@ -375,6 +397,7 @@ export const useStore = create<AppState>((set, get) => ({
     // Also mark completion with duration
     const habit = get().habits.find(h => h.id === habitId);
     if (habit) {
+      const prevLevel = get().xpInfo.level;
       const completion: Completion = {
         id: crypto.randomUUID(),
         habitId,
@@ -388,8 +411,19 @@ export const useStore = create<AppState>((set, get) => ({
         updatedAt: now.toISOString(),
       };
       await completionRepo.upsert(completion);
+      playTimerStop();
       get().addToast(`+${habit.xpPerCompletion} XP`, 'xp');
       get().triggerConfetti();
+
+      // Check for level up
+      const tempCompletions = await db.completions.filter(c => !c.deletedAt).toArray();
+      const newXpInfo = getXPInfo(tempCompletions, todayStr);
+      if (newXpInfo.level > prevLevel) {
+        setTimeout(() => {
+          playLevelUp();
+          get().addToast(`Level ${newXpInfo.level}!`, 'success');
+        }, 600);
+      }
 
       // Check stacked
       const stackedHabits = get().habits.filter(h => h.anchorHabitId === habitId);

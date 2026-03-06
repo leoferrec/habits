@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Palette,
@@ -10,10 +11,13 @@ import {
   Sun,
   Grape,
   Check,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import type { ThemeName } from '../types';
 import { useStore } from '../store';
 import { db } from '../db';
+import { isSoundEnabled, setSoundEnabled, playComplete } from '../sounds';
 
 const themeOptions: { name: ThemeName; label: string; emoji: string; colors: string[] }[] = [
   {
@@ -38,6 +42,7 @@ const themeOptions: { name: ThemeName; label: string; emoji: string; colors: str
 
 export default function Settings() {
   const { theme, setTheme, colorMode, toggleColorMode, xpInfo, habits, completions, relapses } = useStore();
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   const handleExportData = async () => {
     const data = {
@@ -202,6 +207,59 @@ export default function Settings() {
               className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-300"
               style={{
                 transform: colorMode === 'dark' ? 'translateX(22px)' : 'translateX(2px)',
+              }}
+            />
+          </div>
+        </button>
+      </motion.div>
+
+      {/* Sound effects toggle */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.14 }}
+        className="rounded-2xl p-4"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border-light)',
+          boxShadow: '0 2px 8px var(--color-shadow)',
+        }}
+      >
+        <button
+          onClick={() => {
+            const newVal = !soundOn;
+            setSoundOn(newVal);
+            setSoundEnabled(newVal);
+            // Play a test sound when turning ON so user hears it
+            if (newVal) setTimeout(() => playComplete(), 100);
+          }}
+          className="w-full flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            {soundOn ? (
+              <Volume2 size={18} style={{ color: 'var(--color-primary)' }} />
+            ) : (
+              <VolumeX size={18} style={{ color: 'var(--color-text-muted)' }} />
+            )}
+            <div className="text-left">
+              <span className="text-sm font-bold block" style={{ color: 'var(--color-text)' }}>
+                Sound Effects
+              </span>
+              <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                Completion dings, timer beeps, and more
+              </span>
+            </div>
+          </div>
+          <div
+            className="relative w-11 h-6 rounded-full transition-colors duration-300"
+            style={{
+              backgroundColor: soundOn ? 'var(--color-primary)' : 'var(--color-border)',
+            }}
+          >
+            <div
+              className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-300"
+              style={{
+                transform: soundOn ? 'translateX(22px)' : 'translateX(2px)',
               }}
             />
           </div>
