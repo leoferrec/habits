@@ -12,6 +12,7 @@ import {
   Unlink,
   Sprout,
   Shield,
+  Pencil,
 } from 'lucide-react';
 import type { RoutineBlock } from '../types';
 import { useStore } from '../store';
@@ -21,6 +22,7 @@ export default function Routine() {
     routineBlocks,
     habits,
     addRoutineBlock,
+    updateRoutineBlock,
     deleteRoutineBlock,
     linkHabitToBlock,
     unlinkHabitFromBlock,
@@ -29,11 +31,38 @@ export default function Routine() {
   } = useStore();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<RoutineBlock | null>(null);
   const [addingToBlockId, setAddingToBlockId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState('🌅');
   const [newStart, setNewStart] = useState('06:00');
   const [newEnd, setNewEnd] = useState('08:00');
+
+  // Edit form state
+  const [editName, setEditName] = useState('');
+  const [editEmoji, setEditEmoji] = useState('');
+  const [editStart, setEditStart] = useState('');
+  const [editEnd, setEditEnd] = useState('');
+
+  const openEdit = (block: RoutineBlock) => {
+    setEditName(block.name);
+    setEditEmoji(block.emoji);
+    setEditStart(block.startTime);
+    setEditEnd(block.endTime);
+    setEditingBlock(block);
+  };
+
+  const handleEdit = async () => {
+    if (!editingBlock || !editName.trim()) return;
+    await updateRoutineBlock(editingBlock.id, {
+      name: editName.trim(),
+      emoji: editEmoji,
+      startTime: editStart,
+      endTime: editEnd,
+    });
+    addToast(`${editEmoji} ${editName} updated!`, 'success');
+    setEditingBlock(null);
+  };
 
   const emojis = ['🌅', '☀️', '🌙', '🌤️', '⭐', '🎯', '💼', '🏠', '🧘', '📖'];
 
@@ -138,17 +167,28 @@ export default function Routine() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (confirm(`Delete "${block.name}"?`)) {
-                          deleteRoutineBlock(block.id);
-                        }
-                      }}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEdit(block)}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                        style={{ color: 'var(--color-text-muted)' }}
+                        title="Edit block"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete "${block.name}"?`)) {
+                            deleteRoutineBlock(block.id);
+                          }
+                        }}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                        style={{ color: 'var(--color-text-muted)' }}
+                        title="Delete block"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Habits in this block */}
@@ -187,7 +227,7 @@ export default function Routine() {
                           <span
                             className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                             style={{
-                              backgroundColor: habit.type === 'break' ? 'rgba(245, 158, 11, 0.1)' : 'var(--color-primary-faded)',
+                              backgroundColor: habit.type === 'break' ? 'var(--color-secondary-faded)' : 'var(--color-primary-faded)',
                               color: habit.type === 'break' ? 'var(--color-secondary)' : 'var(--color-primary)',
                             }}
                           >
@@ -387,6 +427,105 @@ export default function Routine() {
                   style={{ background: 'var(--color-gradient)' }}
                 >
                   <Check size={16} /> Create Block
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit modal */}
+      <AnimatePresence>
+        {editingBlock && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] flex items-end justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            onClick={() => setEditingBlock(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="w-full max-w-lg rounded-t-3xl p-5 pb-8"
+              style={{ backgroundColor: 'var(--color-surface)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+                  Edit Time Block
+                </h3>
+                <button onClick={() => setEditingBlock(null)} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <X size={16} style={{ color: 'var(--color-text-muted)' }} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Name</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="e.g., Morning Ritual"
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)', color: 'var(--color-text)' }}
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Emoji</label>
+                  <div className="flex flex-wrap gap-2">
+                    {emojis.map(e => (
+                      <button
+                        key={e}
+                        onClick={() => setEditEmoji(e)}
+                        className="w-10 h-10 rounded-xl text-lg flex items-center justify-center transition-all"
+                        style={{
+                          backgroundColor: editEmoji === e ? 'var(--color-primary-faded)' : 'var(--color-bg-secondary)',
+                          border: `2px solid ${editEmoji === e ? 'var(--color-primary)' : 'transparent'}`,
+                        }}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Start</label>
+                    <input
+                      type="time"
+                      value={editStart}
+                      onChange={e => setEditStart(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                      style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)', color: 'var(--color-text)' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>End</label>
+                    <input
+                      type="time"
+                      value={editEnd}
+                      onChange={e => setEditEnd(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                      style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)', color: 'var(--color-text)' }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleEdit}
+                  disabled={!editName.trim()}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold text-white transition-all active:scale-[0.97] disabled:opacity-40"
+                  style={{ background: 'var(--color-gradient)' }}
+                >
+                  <Check size={16} /> Save Changes
                 </button>
               </div>
             </motion.div>

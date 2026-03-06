@@ -57,7 +57,7 @@ export const habitRepo = {
 // ---- RoutineBlock Repo ----
 export const routineRepo = {
   async getAll(): Promise<RoutineBlock[]> {
-    return db.routineBlocks.filter((r) => !r.deletedAt).sortBy('sortOrder');
+    return db.routineBlocks.filter((r) => !r.deletedAt).sortBy('startTime');
   },
 
   async create(block: RoutineBlock): Promise<string> {

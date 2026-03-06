@@ -203,6 +203,7 @@ export const useStore = create<AppState>((set, get) => ({
     await routineRepo.create(block);
     const routineBlocks = await routineRepo.getAll();
     set({ routineBlocks });
+    playCreate();
   },
 
   updateRoutineBlock: async (id, changes) => {
@@ -215,6 +216,7 @@ export const useStore = create<AppState>((set, get) => ({
     await routineRepo.softDelete(id);
     const routineBlocks = await routineRepo.getAll();
     set({ routineBlocks });
+    playDelete();
   },
 
   linkHabitToBlock: async (habitId, blockId) => {
