@@ -7,6 +7,7 @@ import {
   Flame,
   Trophy,
   Trash2,
+  Pencil,
   ChevronRight,
   Search,
   X,
@@ -24,10 +25,12 @@ import type { Habit } from '../types';
 import { useStore } from '../store';
 import { getStrengthLabel } from '../logic';
 import HabitWizard from '../components/HabitWizard';
+import HabitEditor from '../components/HabitEditor';
 
 export default function Habits() {
   const { habits, deleteHabit } = useStore();
   const [showWizard, setShowWizard] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [filter, setFilter] = useState<'all' | 'build' | 'break'>('all');
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -139,6 +142,7 @@ export default function Habits() {
                 expanded={expandedId === habit.id}
                 onToggleExpand={() => setExpandedId(expandedId === habit.id ? null : habit.id)}
                 onDelete={deleteHabit}
+                onEdit={setEditingHabit}
                 allHabits={habits}
               />
             ))}
@@ -175,6 +179,7 @@ export default function Habits() {
                 expanded={expandedId === habit.id}
                 onToggleExpand={() => setExpandedId(expandedId === habit.id ? null : habit.id)}
                 onDelete={deleteHabit}
+                onEdit={setEditingHabit}
                 allHabits={habits}
               />
             ))}
@@ -195,6 +200,11 @@ export default function Habits() {
       <AnimatePresence>
         {showWizard && <HabitWizard onClose={() => setShowWizard(false)} />}
       </AnimatePresence>
+
+      {/* Editor modal */}
+      <AnimatePresence>
+        {editingHabit && <HabitEditor habit={editingHabit} onClose={() => setEditingHabit(null)} />}
+      </AnimatePresence>
     </div>
   );
 }
@@ -209,10 +219,11 @@ interface HabitCardProps {
   expanded: boolean;
   onToggleExpand: () => void;
   onDelete: (id: string) => Promise<void>;
+  onEdit: (habit: Habit) => void;
   allHabits: Habit[];
 }
 
-function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allHabits }: HabitCardProps) {
+function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, onEdit, allHabits }: HabitCardProps) {
   return (
     <motion.div
       key={habit.id}
@@ -354,14 +365,24 @@ function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
                 </div>
               )}
 
-              <button
-                onClick={() => { if (confirm(`Delete "${habit.name}"?`)) onDelete(habit.id); }}
-                className="flex items-center gap-1.5 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg transition-colors"
-                style={{ color: 'var(--color-danger)', backgroundColor: 'rgba(239, 68, 68, 0.08)' }}
-              >
-                <Trash2 size={12} />
-                Delete Habit
-              </button>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => onEdit(habit)}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-primary)', backgroundColor: 'var(--color-primary-faded)' }}
+                >
+                  <Pencil size={12} />
+                  Edit Habit
+                </button>
+                <button
+                  onClick={() => { if (confirm(`Delete "${habit.name}"?`)) onDelete(habit.id); }}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-danger)', backgroundColor: 'rgba(239, 68, 68, 0.08)' }}
+                >
+                  <Trash2 size={12} />
+                  Delete
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -374,7 +395,7 @@ function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
    BREAK HABIT CARD — orange/amber warm design
    ═══════════════════════════════════════════════ */
 
-function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allHabits }: HabitCardProps) {
+function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, onEdit, allHabits }: HabitCardProps) {
   return (
     <motion.div
       key={habit.id}
@@ -506,14 +527,24 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
                 </div>
               )}
 
-              <button
-                onClick={() => { if (confirm(`Delete "${habit.name}"?`)) onDelete(habit.id); }}
-                className="flex items-center gap-1.5 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg transition-colors"
-                style={{ color: 'var(--color-danger)', backgroundColor: 'rgba(239, 68, 68, 0.08)' }}
-              >
-                <Trash2 size={12} />
-                Delete Habit
-              </button>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => onEdit(habit)}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-secondary)', backgroundColor: 'var(--color-secondary-faded)' }}
+                >
+                  <Pencil size={12} />
+                  Edit Habit
+                </button>
+                <button
+                  onClick={() => { if (confirm(`Delete "${habit.name}"?`)) onDelete(habit.id); }}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  style={{ color: 'var(--color-danger)', backgroundColor: 'rgba(239, 68, 68, 0.08)' }}
+                >
+                  <Trash2 size={12} />
+                  Delete
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

@@ -98,15 +98,21 @@ export default function HabitCard({ habit, index, onViewDetail }: Props) {
             if (isDurationHabit && !isDone) return; // Use timer instead
             toggleHabitDone(habit.id);
           }}
-          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
+          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 relative ${
             isDurationHabit && !isDone ? 'cursor-default' : 'cursor-pointer active:scale-90'
           }`}
           style={{
             backgroundColor: isDone
               ? isBreak ? 'var(--color-secondary)' : 'var(--color-primary)'
-              : 'var(--color-primary-faded)',
+              : 'transparent',
             color: isDone ? '#fff' : isBreak ? 'var(--color-secondary)' : 'var(--color-primary)',
+            border: isDone
+              ? 'none'
+              : isDurationHabit
+                ? '2px dashed var(--color-border-light)'
+                : `2px solid ${isBreak ? 'var(--color-secondary)' : 'var(--color-primary)'}`,
           }}
+          title={isDurationHabit && !isDone ? 'Use the timer to complete' : isDone ? 'Undo completion' : 'Mark as done'}
         >
           {isDone ? (
             <motion.div
@@ -116,8 +122,21 @@ export default function HabitCard({ habit, index, onViewDetail }: Props) {
             >
               <Check size={20} strokeWidth={3} />
             </motion.div>
+          ) : isDurationHabit ? (
+            <Timer size={16} style={{ color: 'var(--color-text-muted)' }} />
           ) : (
-            <span className="text-lg">{habit.emoji}</span>
+            <motion.div
+              className="rounded-md"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.85 }}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 6,
+                border: `2px solid ${isBreak ? 'var(--color-secondary)' : 'var(--color-primary)'}`,
+                backgroundColor: 'transparent',
+              }}
+            />
           )}
         </button>
 
