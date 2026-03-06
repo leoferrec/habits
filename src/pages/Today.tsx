@@ -10,15 +10,18 @@ export default function Today() {
   const today = new Date();
   const dateLabel = format(today, 'EEEE, MMMM d');
 
-  const completedCount = todayHabits.filter(h => h.todayCompletion?.done).length;
-  const totalCount = todayHabits.length;
+  // Only show build habits in the main view (break habits are in the BreakPanel)
+  const buildHabitsToday = todayHabits.filter(h => h.type === 'build');
+
+  const completedCount = buildHabitsToday.filter(h => h.todayCompletion?.done).length;
+  const totalCount = buildHabitsToday.length;
   const completionPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // Group habits by routine block
-  const habitsByBlock: Record<string, typeof todayHabits> = {};
-  const unblocked: typeof todayHabits = [];
+  const habitsByBlock: Record<string, typeof buildHabitsToday> = {};
+  const unblocked: typeof buildHabitsToday = [];
 
-  todayHabits.forEach(h => {
+  buildHabitsToday.forEach(h => {
     if (h.routineBlockIds.length > 0) {
       const blockId = h.routineBlockIds[0];
       if (!habitsByBlock[blockId]) habitsByBlock[blockId] = [];
@@ -122,7 +125,7 @@ export default function Today() {
         >
           <div
             className="w-12 h-12 mx-auto mb-1.5 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(139, 92, 246, 0.08)' }}
+            style={{ backgroundColor: 'var(--color-accent-faded)' }}
           >
             <Sparkles size={22} style={{ color: 'var(--color-accent)' }} />
           </div>
@@ -178,7 +181,7 @@ export default function Today() {
       )}
 
       {/* Empty state */}
-      {todayHabits.length === 0 && (
+      {buildHabitsToday.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -37,6 +37,10 @@ export default function HabitWizard({ onClose }: Props) {
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
   const [lawTag, setLawTag] = useState('');
 
+  // Build habit trigger/reward (Atomic Habits flow)
+  const [trigger, setTrigger] = useState('');
+  const [habitReward, setHabitReward] = useState('');
+
   // Break habit loop
   const [cue, setCue] = useState('');
   const [craving, setCraving] = useState('');
@@ -78,6 +82,8 @@ export default function HabitWizard({ onClose }: Props) {
       xpPerCompletion,
       anchorHabitId: anchorHabitId || undefined,
       lawTag: lawTag || undefined,
+      trigger: type === 'build' && trigger.trim() ? trigger.trim() : undefined,
+      reward: type === 'build' && habitReward.trim() ? habitReward.trim() : undefined,
       routineBlockIds: selectedBlocks,
       habitLoop: type === 'break' && cue ? { cue, craving, response, reward } : undefined,
       sortOrder: habits.length,
@@ -168,7 +174,7 @@ export default function HabitWizard({ onClose }: Props) {
                   onClick={() => { setType('break'); setEmoji('🛡️'); }}
                   className="p-4 rounded-2xl text-left transition-all"
                   style={{
-                    backgroundColor: type === 'break' ? 'rgba(245, 158, 11, 0.08)' : 'var(--color-bg-secondary)',
+                    backgroundColor: type === 'break' ? 'var(--color-secondary-faded)' : 'var(--color-bg-secondary)',
                     border: `2px solid ${type === 'break' ? 'var(--color-secondary)' : 'transparent'}`,
                   }}
                 >
@@ -392,6 +398,53 @@ export default function HabitWizard({ onClose }: Props) {
                   ))}
                 </div>
               </div>
+
+              {/* Trigger → Habit → Reward */}
+              <div
+                className="rounded-xl p-3 space-y-3"
+                style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)' }}
+              >
+                <p className="text-[11px] font-bold" style={{ color: 'var(--color-primary)' }}>
+                  Habit Group (optional)
+                </p>
+                <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                  Define a trigger and reward to create a complete habit loop
+                </p>
+                <div>
+                  <label className="text-[10px] font-semibold block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    Trigger
+                  </label>
+                  <input
+                    type="text"
+                    value={trigger}
+                    onChange={e => setTrigger(e.target.value)}
+                    placeholder="e.g., After I wake up..."
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{
+                      backgroundColor: 'var(--color-surface)',
+                      border: '1px solid var(--color-border-light)',
+                      color: 'var(--color-text)',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    Reward
+                  </label>
+                  <input
+                    type="text"
+                    value={habitReward}
+                    onChange={e => setHabitReward(e.target.value)}
+                    placeholder="e.g., I'll feel energized"
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{
+                      backgroundColor: 'var(--color-surface)',
+                      border: '1px solid var(--color-border-light)',
+                      color: 'var(--color-text)',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -486,7 +539,7 @@ export default function HabitWizard({ onClose }: Props) {
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
                       style={{
-                        backgroundColor: type === 'break' ? 'rgba(245, 158, 11, 0.1)' : 'var(--color-primary-faded)',
+                        backgroundColor: type === 'break' ? 'var(--color-secondary-faded)' : 'var(--color-primary-faded)',
                         color: type === 'break' ? 'var(--color-secondary)' : 'var(--color-primary)',
                       }}
                     >
@@ -504,6 +557,28 @@ export default function HabitWizard({ onClose }: Props) {
                   <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
                     Stacked after: {habits.find(h => h.id === anchorHabitId)?.name}
                   </p>
+                )}
+                {type === 'build' && (trigger || habitReward) && (
+                  <div
+                    className="mt-2 rounded-lg p-2.5 flex items-center gap-2"
+                    style={{ backgroundColor: 'var(--color-primary-faded)', border: '1px solid var(--color-border-light)' }}
+                  >
+                    {trigger && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}>
+                        {trigger}
+                      </span>
+                    )}
+                    {trigger && <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>&rarr;</span>}
+                    <span className="text-[10px] font-bold" style={{ color: 'var(--color-primary)' }}>
+                      {emoji} {name}
+                    </span>
+                    {habitReward && <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>&rarr;</span>}
+                    {habitReward && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-accent-faded)', color: 'var(--color-accent)' }}>
+                        {habitReward}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

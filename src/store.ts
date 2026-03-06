@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { format } from 'date-fns';
-import type { Habit, RoutineBlock, Completion, TimerSession, Relapse, ThemeName, HabitWithStats, XPInfo } from './types';
+import type { Habit, RoutineBlock, Completion, TimerSession, Relapse, ThemeName, ColorMode, HabitWithStats, XPInfo } from './types';
 import { habitRepo, routineRepo, completionRepo, timerRepo, relapseRepo, db } from './db';
 import { calculateStrength, calculateStreak, getXPInfo, getTodayStr, isHabitScheduledForDate } from './logic';
 import { applyTheme } from './theme';
@@ -19,14 +19,22 @@ interface AppState {
 
   // UI
   theme: ThemeName;
+  colorMode: ColorMode;
   toasts: Array<{ id: string; message: string; type: 'xp' | 'info' | 'success' | 'warning' }>;
   showConfetti: boolean;
   stackedPromptHabitId: string | null;
   isLoading: boolean;
+  breakPanelOpen: boolean;
+  breakPanelPinned: boolean;
 
   // Actions
   loadAll: () => Promise<void>;
   setTheme: (theme: ThemeName) => void;
+  setColorMode: (mode: ColorMode) => void;
+  toggleColorMode: () => void;
+  toggleBreakPanel: () => void;
+  setBreakPanelOpen: (open: boolean) => void;
+  toggleBreakPanelPinned: () => void;
   addHabit: (habit: Habit) => Promise<void>;
   updateHabit: (id: string, changes: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
@@ -58,10 +66,13 @@ export const useStore = create<AppState>((set, get) => ({
   todayHabits: [],
   xpInfo: { totalXP: 0, todayXP: 0, level: 1, levelProgress: 0, xpToNextLevel: 100 },
   theme: (localStorage.getItem('theme') as ThemeName) || 'mint',
+  colorMode: (localStorage.getItem('colorMode') as ColorMode) || 'light',
   toasts: [],
   showConfetti: false,
   stackedPromptHabitId: null,
   isLoading: true,
+  breakPanelOpen: false,
+  breakPanelPinned: localStorage.getItem('breakPanelPinned') === 'true',
 
   loadAll: async () => {
     const [habits, routineBlocks] = await Promise.all([
@@ -78,7 +89,8 @@ export const useStore = create<AppState>((set, get) => ({
 
     // Apply saved theme
     const savedTheme = (localStorage.getItem('theme') as ThemeName) || 'mint';
-    applyTheme(savedTheme);
+    const savedColorMode = (localStorage.getItem('colorMode') as ColorMode) || 'light';
+    applyTheme(savedTheme, savedColorMode);
 
     set({
       habits,
@@ -87,6 +99,7 @@ export const useStore = create<AppState>((set, get) => ({
       relapses: allRelapses,
       xpInfo,
       theme: savedTheme,
+      colorMode: savedColorMode,
       isLoading: false,
     });
 
@@ -130,8 +143,33 @@ export const useStore = create<AppState>((set, get) => ({
 
   setTheme: (theme) => {
     localStorage.setItem('theme', theme);
-    applyTheme(theme);
+    applyTheme(theme, get().colorMode);
     set({ theme });
+  },
+
+  setColorMode: (mode) => {
+    localStorage.setItem('colorMode', mode);
+    applyTheme(get().theme, mode);
+    set({ colorMode: mode });
+  },
+
+  toggleColorMode: () => {
+    const newMode = get().colorMode === 'light' ? 'dark' : 'light';
+    get().setColorMode(newMode);
+  },
+
+  toggleBreakPanel: () => {
+    set(s => ({ breakPanelOpen: !s.breakPanelOpen }));
+  },
+
+  setBreakPanelOpen: (open) => {
+    set({ breakPanelOpen: open });
+  },
+
+  toggleBreakPanelPinned: () => {
+    const newVal = !get().breakPanelPinned;
+    localStorage.setItem('breakPanelPinned', String(newVal));
+    set({ breakPanelPinned: newVal });
   },
 
   addHabit: async (habit) => {

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,10 +11,14 @@ import {
   Star,
   Flame,
   Zap,
+  Sun,
+  Moon,
+  Shield,
 } from 'lucide-react';
 import { useStore } from '../store';
 import ConfettiEffect from './ConfettiEffect';
 import ToastContainer from './ToastContainer';
+import BreakPanel from './BreakPanel';
 
 const tabs = [
   { path: '/', icon: CalendarCheck, label: 'Today' },
@@ -24,12 +29,38 @@ const tabs = [
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isDesktop;
+}
+
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { xpInfo, showConfetti } = useStore();
+  const {
+    xpInfo,
+    showConfetti,
+    colorMode,
+    toggleColorMode,
+    todayHabits,
+    breakPanelOpen,
+    toggleBreakPanel,
+    breakPanelPinned,
+  } = useStore();
+  const isDesktop = useIsDesktop();
 
   const currentTab = tabs.find(t => t.path === location.pathname) || tabs[0];
+
+  // Count unchecked break habits for badge
+  const uncheckedBreakCount = todayHabits.filter(h => h.type === 'break' && !h.todayCompletion?.done).length;
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-pattern" style={{ backgroundColor: 'var(--color-bg)' }}>
@@ -58,6 +89,19 @@ export default function Layout() {
 
         {/* XP & Level */}
         <div className="flex items-center gap-3">
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggleColorMode}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+            style={{
+              backgroundColor: 'var(--color-primary-faded)',
+              color: 'var(--color-primary)',
+            }}
+            aria-label="Toggle dark mode"
+          >
+            {colorMode === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+
           {/* Today XP */}
           <div
             className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
@@ -112,7 +156,12 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main
+        className="flex-1 overflow-y-auto pb-20 transition-all duration-300"
+        style={{
+          marginRight: isDesktop && breakPanelOpen && breakPanelPinned ? '320px' : '0',
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -174,6 +223,41 @@ export default function Layout() {
           );
         })}
       </nav>
+
+      {/* Break Panel floating tab */}
+      {!breakPanelOpen && (
+        <button
+          onClick={toggleBreakPanel}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[55] flex items-center gap-1 py-3 px-1.5 rounded-l-xl transition-all active:scale-95"
+          style={{
+            backgroundColor: 'var(--color-secondary)',
+            color: '#fff',
+            boxShadow: '-2px 2px 12px rgba(0,0,0,0.15)',
+            writingMode: 'vertical-rl',
+          }}
+          aria-label="Open break habits panel"
+        >
+          <Shield size={14} />
+          <span className="text-[10px] font-bold tracking-wider">BREAK</span>
+          {uncheckedBreakCount > 0 && (
+            <span
+              className="absolute -left-1.5 -top-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--color-danger)',
+                color: '#fff',
+                writingMode: 'horizontal-tb',
+              }}
+            >
+              {uncheckedBreakCount}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Break Panel slide-out */}
+      <AnimatePresence>
+        {breakPanelOpen && <BreakPanel isDesktop={isDesktop} />}
+      </AnimatePresence>
 
       {/* Global overlays */}
       <ConfettiEffect active={showConfetti} />

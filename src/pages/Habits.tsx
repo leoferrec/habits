@@ -17,6 +17,8 @@ import {
   ShieldAlert,
   TrendingUp,
   ArrowRight,
+  Bell,
+  Gift,
 } from 'lucide-react';
 import type { Habit } from '../types';
 import { useStore } from '../store';
@@ -151,14 +153,14 @@ export default function Habits() {
             <div className="flex items-center gap-2 px-1 mt-3">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-secondary)' }}
+                style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}
               >
                 <ShieldAlert size={14} />
               </div>
               <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-secondary)' }}>
                 Break Habits
               </h3>
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-secondary)' }}>
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}>
                 {breakHabits.length}
               </span>
             </div>
@@ -220,12 +222,12 @@ function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
       transition={{ delay: index * 0.04, duration: 0.25 }}
       className="rounded-2xl overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(13,148,136,0.04) 0%, rgba(94,234,212,0.06) 100%)',
-        borderTop: '1px solid rgba(13,148,136,0.15)',
-        borderRight: '1px solid rgba(13,148,136,0.15)',
-        borderBottom: '1px solid rgba(13,148,136,0.15)',
+        background: 'var(--color-gradient-subtle)',
+        borderTop: '1px solid var(--color-border-light)',
+        borderRight: '1px solid var(--color-border-light)',
+        borderBottom: '1px solid var(--color-border-light)',
         borderLeft: '4px solid var(--color-primary)',
-        boxShadow: '0 2px 12px rgba(13,148,136,0.06)',
+        boxShadow: '0 2px 12px var(--color-shadow)',
       }}
     >
       <button
@@ -295,7 +297,7 @@ function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
           >
             <div
               className="px-4 pb-4 pt-2 space-y-3"
-              style={{ borderTop: '1px solid rgba(13,148,136,0.12)' }}
+              style={{ borderTop: '1px solid var(--color-border-light)' }}
             >
               {habit.lawTag && (
                 <div className="flex items-center gap-2">
@@ -321,6 +323,37 @@ function BuildHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
                   </span>
                 </div>
               )}
+
+              {/* Trigger → Habit → Reward flow */}
+              {(habit.trigger || habit.reward) && (
+                <div
+                  className="rounded-xl p-3 flex items-center gap-2 flex-wrap"
+                  style={{ backgroundColor: 'var(--color-primary-faded)', border: '1px solid var(--color-border-light)' }}
+                >
+                  {habit.trigger && (
+                    <div className="flex items-center gap-1.5">
+                      <Bell size={11} style={{ color: 'var(--color-secondary)' }} />
+                      <span className="text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                        {habit.trigger}
+                      </span>
+                    </div>
+                  )}
+                  {habit.trigger && <ArrowRight size={10} style={{ color: 'var(--color-text-muted)' }} />}
+                  <span className="text-[11px] font-bold" style={{ color: 'var(--color-primary)' }}>
+                    {habit.emoji} {habit.name}
+                  </span>
+                  {habit.reward && <ArrowRight size={10} style={{ color: 'var(--color-text-muted)' }} />}
+                  {habit.reward && (
+                    <div className="flex items-center gap-1.5">
+                      <Gift size={11} style={{ color: 'var(--color-accent)' }} />
+                      <span className="text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                        {habit.reward}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={() => { if (confirm(`Delete "${habit.name}"?`)) onDelete(habit.id); }}
                 className="flex items-center gap-1.5 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg transition-colors"
@@ -351,12 +384,12 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
       transition={{ delay: index * 0.04, duration: 0.25 }}
       className="rounded-2xl overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(251,146,60,0.06) 100%)',
-        borderTop: '1px solid rgba(245,158,11,0.18)',
-        borderRight: '1px solid rgba(245,158,11,0.18)',
-        borderBottom: '1px solid rgba(245,158,11,0.18)',
+        background: 'var(--color-secondary-faded)',
+        borderTop: '1px solid var(--color-border-light)',
+        borderRight: '1px solid var(--color-border-light)',
+        borderBottom: '1px solid var(--color-border-light)',
         borderLeft: '4px solid var(--color-secondary)',
-        boxShadow: '0 2px 12px rgba(245,158,11,0.06)',
+        boxShadow: '0 2px 12px var(--color-shadow)',
       }}
     >
       <button
@@ -366,7 +399,7 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
         {/* Big emoji circle — warm tint */}
         <div
           className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}
+          style={{ backgroundColor: 'var(--color-secondary-faded)' }}
         >
           <span className="text-xl">{habit.emoji}</span>
         </div>
@@ -378,7 +411,7 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
           <div className="flex items-center gap-2 mt-1">
             <span
               className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold"
-              style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: 'var(--color-secondary)' }}
+              style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}
             >
               <Shield size={10} />
               BREAK
@@ -408,7 +441,7 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
         <div className="px-4 pb-3 -mt-1">
           <div
             className="flex items-center gap-2 text-[10px] font-medium rounded-lg px-2.5 py-1.5"
-            style={{ backgroundColor: 'rgba(245,158,11,0.06)', color: 'var(--color-text-muted)' }}
+            style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-text-muted)' }}
           >
             <span style={{ color: 'var(--color-secondary)' }}>{habit.habitLoop.cue}</span>
             <ArrowRight size={8} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
@@ -431,12 +464,12 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
           >
             <div
               className="px-4 pb-4 pt-2 space-y-3"
-              style={{ borderTop: '1px solid rgba(245,158,11,0.12)' }}
+              style={{ borderTop: '1px solid var(--color-border-light)' }}
             >
               {habit.lawTag && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Law:</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'var(--color-secondary)' }}>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}>
                     Make it {habit.lawTag}
                   </span>
                 </div>
@@ -446,7 +479,7 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
               {habit.habitLoop && (
                 <div
                   className="rounded-xl p-3 space-y-2"
-                  style={{ backgroundColor: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.1)' }}
+                  style={{ backgroundColor: 'var(--color-secondary-faded)', border: '1px solid var(--color-border-light)' }}
                 >
                   <p className="text-[11px] font-bold flex items-center gap-1.5" style={{ color: 'var(--color-secondary)' }}>
                     <ShieldAlert size={12} />
@@ -456,7 +489,7 @@ function BreakHabitCard({ habit, index, expanded, onToggleExpand, onDelete, allH
                     <div key={key} className="flex gap-2 items-start">
                       <span
                         className="text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: 'var(--color-secondary)' }}
+                        style={{ backgroundColor: 'var(--color-secondary-faded)', color: 'var(--color-secondary)' }}
                       >
                         {i + 1}
                       </span>

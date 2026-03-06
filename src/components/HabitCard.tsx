@@ -12,6 +12,9 @@ import {
   Shield,
   ChevronRight,
   AlertTriangle,
+  Bell,
+  ArrowRight,
+  Gift,
 } from 'lucide-react';
 import type { HabitWithStats } from '../types';
 import { useStore } from '../store';
@@ -261,8 +264,8 @@ export default function HabitCard({ habit, index, onViewDetail }: Props) {
             className="w-6 h-6 rounded-full flex items-center justify-center"
             style={{
               backgroundColor: isBreak
-                ? 'rgba(245, 158, 11, 0.1)'
-                : 'rgba(13, 148, 136, 0.1)',
+                ? 'var(--color-secondary-faded)'
+                : 'var(--color-primary-faded)',
               color: isBreak ? 'var(--color-secondary)' : 'var(--color-primary)',
             }}
           >
@@ -287,12 +290,103 @@ export default function HabitCard({ habit, index, onViewDetail }: Props) {
             <span
               className="text-[10px] px-2 py-0.5 rounded-full font-medium"
               style={{
-                backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                backgroundColor: 'var(--color-accent-faded)',
                 color: 'var(--color-accent)',
               }}
             >
               Stacked
             </span>
+          )}
+        </div>
+      )}
+
+      {/* Trigger → Habit → Reward flow (3-card) */}
+      {!isBreak && (habit.trigger || habit.reward) && (
+        <div className="mt-3 flex items-stretch gap-1.5">
+          {/* Trigger card */}
+          {habit.trigger && (
+            <>
+              <div
+                className="flex-1 rounded-xl px-2.5 py-2 flex flex-col items-center gap-1 min-w-0"
+                style={{
+                  backgroundColor: 'var(--color-secondary-faded)',
+                  border: '1px solid var(--color-border-light)',
+                }}
+              >
+                <Bell size={12} style={{ color: 'var(--color-secondary)' }} />
+                <span
+                  className="text-[9px] font-bold uppercase tracking-wider"
+                  style={{ color: 'var(--color-secondary)' }}
+                >
+                  Trigger
+                </span>
+                <span
+                  className="text-[10px] text-center leading-tight font-medium truncate w-full"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                  title={habit.trigger}
+                >
+                  {habit.trigger}
+                </span>
+              </div>
+              <div className="flex items-center flex-shrink-0">
+                <ArrowRight size={12} style={{ color: 'var(--color-text-muted)' }} />
+              </div>
+            </>
+          )}
+
+          {/* Habit card (center) */}
+          <div
+            className="flex-1 rounded-xl px-2.5 py-2 flex flex-col items-center gap-1 min-w-0"
+            style={{
+              backgroundColor: 'var(--color-primary-faded)',
+              border: '1px solid var(--color-border-light)',
+            }}
+          >
+            <span className="text-sm">{habit.emoji}</span>
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Habit
+            </span>
+            <span
+              className="text-[10px] text-center leading-tight font-medium truncate w-full"
+              style={{ color: 'var(--color-text-secondary)' }}
+              title={habit.name}
+            >
+              {habit.name}
+            </span>
+          </div>
+
+          {/* Reward card */}
+          {habit.reward && (
+            <>
+              <div className="flex items-center flex-shrink-0">
+                <ArrowRight size={12} style={{ color: 'var(--color-text-muted)' }} />
+              </div>
+              <div
+                className="flex-1 rounded-xl px-2.5 py-2 flex flex-col items-center gap-1 min-w-0"
+                style={{
+                  backgroundColor: 'var(--color-accent-faded)',
+                  border: '1px solid var(--color-border-light)',
+                }}
+              >
+                <Gift size={12} style={{ color: 'var(--color-accent)' }} />
+                <span
+                  className="text-[9px] font-bold uppercase tracking-wider"
+                  style={{ color: 'var(--color-accent)' }}
+                >
+                  Reward
+                </span>
+                <span
+                  className="text-[10px] text-center leading-tight font-medium truncate w-full"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                  title={habit.reward}
+                >
+                  {habit.reward}
+                </span>
+              </div>
+            </>
           )}
         </div>
       )}

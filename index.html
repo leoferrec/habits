@@ -14,6 +14,9 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function(){var cm=localStorage.getItem('colorMode');if(cm==='dark')document.documentElement.setAttribute('data-color-mode','dark');})();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

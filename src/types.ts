@@ -16,6 +16,10 @@ export interface Habit {
   anchorHabitId?: string;
   /** The four laws label */
   lawTag?: string;
+  /** Trigger for the habit (Atomic Habits: cue/trigger) */
+  trigger?: string;
+  /** Reward after completing the habit */
+  reward?: string;
   /** Routine blocks this habit belongs to */
   routineBlockIds: string[];
   /** For break habits: cue, craving, response, reward (habit loop) */
@@ -88,6 +92,7 @@ export interface Relapse {
 }
 
 export type ThemeName = 'mint' | 'sunset' | 'grape';
+export type ColorMode = 'light' | 'dark';
 
 export interface ThemeColors {
   bg: string;
@@ -98,7 +103,9 @@ export interface ThemeColors {
   primaryLight: string;
   primaryFaded: string;
   secondary: string;
+  secondaryFaded: string;
   accent: string;
+  accentFaded: string;
   danger: string;
   success: string;
   warning: string;

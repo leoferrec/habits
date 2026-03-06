@@ -37,7 +37,7 @@ const themeOptions: { name: ThemeName; label: string; emoji: string; colors: str
 ];
 
 export default function Settings() {
-  const { theme, setTheme, xpInfo, habits, completions, relapses } = useStore();
+  const { theme, setTheme, colorMode, toggleColorMode, xpInfo, habits, completions, relapses } = useStore();
 
   const handleExportData = async () => {
     const data = {
@@ -164,6 +164,48 @@ export default function Settings() {
             </button>
           ))}
         </div>
+      </motion.div>
+
+      {/* Dark mode toggle */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+        className="rounded-2xl p-4"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border-light)',
+          boxShadow: '0 2px 8px var(--color-shadow)',
+        }}
+      >
+        <button
+          onClick={toggleColorMode}
+          className="w-full flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            {colorMode === 'dark' ? (
+              <Moon size={18} style={{ color: 'var(--color-primary)' }} />
+            ) : (
+              <Sun size={18} style={{ color: 'var(--color-primary)' }} />
+            )}
+            <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+              Dark Mode
+            </span>
+          </div>
+          <div
+            className="relative w-11 h-6 rounded-full transition-colors duration-300"
+            style={{
+              backgroundColor: colorMode === 'dark' ? 'var(--color-primary)' : 'var(--color-border)',
+            }}
+          >
+            <div
+              className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-300"
+              style={{
+                transform: colorMode === 'dark' ? 'translateX(22px)' : 'translateX(2px)',
+              }}
+            />
+          </div>
+        </button>
       </motion.div>
 
       {/* Data management */}

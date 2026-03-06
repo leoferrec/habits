@@ -262,7 +262,7 @@ export default function Break() {
                         onClick={() => handleSelectHabit(h.id)}
                         className="w-full flex items-center gap-2 p-3 rounded-xl text-left transition-all"
                         style={{
-                          backgroundColor: selectedHabitId === h.id ? 'rgba(245, 158, 11, 0.08)' : 'var(--color-bg-secondary)',
+                          backgroundColor: selectedHabitId === h.id ? 'var(--color-secondary-faded)' : 'var(--color-bg-secondary)',
                           border: `2px solid ${selectedHabitId === h.id ? 'var(--color-secondary)' : 'transparent'}`,
                         }}
                       >

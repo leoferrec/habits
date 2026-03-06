@@ -24,6 +24,8 @@
   --color-shadow: rgba(13, 148, 136, 0.08);
   --color-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #5eead4 100%);
   --color-gradient-subtle: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  --color-secondary-faded: rgba(245, 158, 11, 0.08);
+  --color-accent-faded: rgba(139, 92, 246, 0.08);
 }
 
 * {
@@ -82,6 +84,11 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+[data-color-mode="dark"] .glass-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Gradient text */
@@ -168,8 +175,8 @@ h1, h2, h3, h4, h5, h6 {
 .bg-pattern {
   background-image:
     radial-gradient(circle at 20% 50%, var(--color-primary-faded) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 50%);
+    radial-gradient(circle at 80% 20%, var(--color-accent-faded) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, var(--color-secondary-faded) 0%, transparent 50%);
 }
 
 /* Reduced motion */
