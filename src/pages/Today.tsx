@@ -10,18 +10,16 @@ export default function Today() {
   const today = new Date();
   const dateLabel = format(today, 'EEEE, MMMM d');
 
-  // Only show build habits in the main view (break habits are in the BreakPanel)
-  const buildHabitsToday = todayHabits.filter(h => h.type === 'build');
-
-  const completedCount = buildHabitsToday.filter(h => h.todayCompletion?.done).length;
-  const totalCount = buildHabitsToday.length;
+  // Show all habits (build + break) on the Today page
+  const completedCount = todayHabits.filter(h => h.todayCompletion?.done).length;
+  const totalCount = todayHabits.length;
   const completionPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // Group habits by routine block
-  const habitsByBlock: Record<string, typeof buildHabitsToday> = {};
-  const unblocked: typeof buildHabitsToday = [];
+  const habitsByBlock: Record<string, typeof todayHabits> = {};
+  const unblocked: typeof todayHabits = [];
 
-  buildHabitsToday.forEach(h => {
+  todayHabits.forEach(h => {
     if (h.routineBlockIds.length > 0) {
       const blockId = h.routineBlockIds[0];
       if (!habitsByBlock[blockId]) habitsByBlock[blockId] = [];
@@ -181,7 +179,7 @@ export default function Today() {
       )}
 
       {/* Empty state */}
-      {buildHabitsToday.length === 0 && (
+      {todayHabits.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
